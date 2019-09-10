@@ -6,6 +6,7 @@ use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class ThemeCommand extends Command
 {
@@ -116,7 +117,8 @@ class ThemeCommand extends Command
      */
     protected function composerUpdate()
     {
-        $this->runCommand('composer update', getcwd());
+        $output = new OutputInterface();
+        $this->runCommand('composer update', ['path' => getcwd()], $output);
     }
 
     /**
@@ -126,9 +128,9 @@ class ThemeCommand extends Command
      * @param  string  $path
      * @return void
      */
-    protected function runCommand($command, $path)
+    protected function runCommand($command, array $arguments, OutputInterface $output)
     {
-        $process = (new Process($command, $path))->setTimeout(null);
+        $process = (new Process($command, $arguments['path']))->setTimeout(null);
 
         if ('\\' !== DIRECTORY_SEPARATOR && file_exists('/dev/tty') && is_readable('/dev/tty')) {
             $process->setTty(true);
