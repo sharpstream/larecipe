@@ -6,6 +6,7 @@ use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class AssetCommand extends Command
 {
@@ -147,7 +148,8 @@ class AssetCommand extends Command
      */
     protected function installNpmDependencies()
     {
-        $this->runCommand('npm set progress=false && npm install', $this->assetPath());
+        $output = new OutputInterface();
+        $this->runCommand('npm set progress=false && npm install', ['path' => $this->assetPath()], $output);
     }
 
     /**
@@ -157,7 +159,8 @@ class AssetCommand extends Command
      */
     protected function compile()
     {
-        $this->runCommand('npm run dev', $this->assetPath());
+        $output = new OutputInterface();
+        $this->runCommand('npm run dev', ['path' => $this->assetPath()], $output);
     }
 
     /**
@@ -167,7 +170,8 @@ class AssetCommand extends Command
      */
     protected function composerUpdate()
     {
-        $this->runCommand('composer update', getcwd());
+        $output = new OutputInterface();
+        $this->runCommand('composer update', ['path' => getcwd()], $output);
     }
 
     /**
@@ -177,9 +181,9 @@ class AssetCommand extends Command
      * @param  string  $path
      * @return void
      */
-    protected function runCommand($command, $path)
+    protected function runCommand($command, array $arguments, OutputInterface $output)
     {
-        $process = (new Process($command, $path))->setTimeout(null);
+        $process = (new Process($command, $arguments['path']))->setTimeout(null);
 
         if ('\\' !== DIRECTORY_SEPARATOR && file_exists('/dev/tty') && is_readable('/dev/tty')) {
             $process->setTty(true);
